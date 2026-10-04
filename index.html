@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI與經濟研究報告 - 專題規劃藍圖</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            color: #1a365d;
+            border-bottom: 3px solid #2b6cb0;
+            padding-bottom: 10px;
+            font-size: 28px;
+        }
+        h2 {
+            color: #2c5282;
+            margin-top: 30px;
+            border-left: 5px solid #4299e1;
+            padding-left: 10px;
+            font-size: 22px;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #edf2f7;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #e53e3e;
+            font-size: 14px;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            color: #edf2f7;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>淡江大學《AI與經濟研究報告》專題規劃藍圖</h1>
+    
+    <div style="background-color: #ebf8ff; border-left: 4px solid #3182ce; padding: 15px; margin-bottom: 25px; border-radius: 4px;">
+        <p style="margin: 5px 0; font-weight: bold;">🎯 專題題目：台灣民生 CPI 波動與區域房價對青年受僱員工實質購買力之跨期擠壓效應：基於向量自我迴歸（VAR）與機器學習特徵權重之研究</p>
+        <p style="margin: 5px 0; font-weight: bold;">📊 數據來源：AREMOS 台灣經濟統計資料庫 (net.aremos.org.tw)</p>
+    </div>
+
+    <h2>一、 研究假說 (Hypotheses)</h2>
+    <ol>
+        <li><strong>假說一（工資僵固性假說）：</strong> 台灣民生基本消費（如食物類、居住類 CPI）的短期波動，對青年受僱員工「實質薪資」具有顯著的負向衝擊，且存在落後傳導效應。</li>
+        <li><strong>假說二（資產財富擠壓假說）：</strong> 房價指數上升，會透過可支配所得的跨期配置，對青年主流從事產業的「實質購買力」產生長期且不可逆的擠壓效應。</li>
+        <li><strong>假說三（AI 特徵非線性假說）：</strong> 相較於傳統線性迴歸，結合機器學習（如隨機森林、SHAP 值）能發現：在不同的經濟景氣循環階段，房價與特定民生 CPI 分項對青年購買力下降的「貢獻度」存在非線性的結構性轉變。</li>
+    </ol>
+
+    <h2>二、 經濟學理傳導機制 (Transmission Mechanism)</h2>
+    <ul>
+        <li><strong>實質工資不靈敏性 (Real Wage Rigidity) 與工資僵固性：</strong> 根據新興凱因斯學派，由於合約限制或勞動市場議價能力較弱，青年族群的名目薪資調整速度慢於民生必需品的物價上漲速度，導致實質購買力在物價波動初期立刻受挫。</li>
+        <li><strong>可支配所得之預算限制擠壓 (Budget Constraint Squeezing)：</strong> 房價或租金的結構性上漲，迫使青年必須提高居住相關支出或預防性儲蓄。在總所得不變的前提下，這會直接產生跨期擠壓，減少其他實質消費支出。</li>
+    </ul>
+
+    <h2>三、 建議採用的數據視覺化圖表</h2>
+    <ul>
+        <li><strong>雙 Y 軸時序圖 (Dual Y-Axis Plot)：</strong> 左軸放民生 CPI 年增率與房價指數，右軸放青年主要產業的實質薪資，用以直觀呈現兩者在時間趨勢上的背離。</li>
+        <li><strong>向量自我迴歸之脈衝響應圖 (VAR Impulse Response Functions, IRF)：</strong> 展示當房價突然發生一個單位的正向衝擊時，青年實質薪資在未來 12 個月內會如何隨時間產生動態反應。</li>
+        <li><strong>SHAP 變數貢獻度熱力圖 (SHAP Dependency Plot)：</strong> 透過機器學習模型計算後，呈現不同通膨環境下，房價與食物類 CPI 對實質購買力下降的動態貢獻度。</li>
+    </ul>
+
+    <h2>四、 Python 資料清洗與分析程式碼</h2>
+
+<pre><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.tsa.api import VAR
+from sklearn.ensemble import RandomForestRegressor
+
+# ==========================================
+# 1. 資料清洗與預處理 (Data Cleaning)
+# ==========================================
+
+try:
+    df = pd.read_csv('aremos_data.csv', encoding='utf-8')
+except UnicodeDecodeError:
+    df = pd.read_csv('aremos_data.csv', encoding='cp950')
+
+# 時間欄位格式轉換並設為索引
+df['date'] = df['date'].astype(str).str.replace('M', '-')
+df['date'] = pd.to_datetime(df['date'] + '-01' if 'M' in str(df['date'].iloc) else df['date'])
+df.set_index('date', inplace=True)
+
+# 處理缺失值
+df = df.ffill().bfill()
+
+# 計算衍生指標：實質薪資 (名目薪資 / 總CPI * 100)
+df['real_wage'] = (df['wage'] / df['cpi_total']) * 100
+
+# 時間序列平穩化：取對數後一階差分
+df_diff = np.log(df[['cpi_food', 'house_price', 'real_wage']]).diff().dropna()
+
+
+# ==========================================
+# 2. 傳統總體經濟分析：向量自我迴歸 (VAR 模型)
+# ==========================================
+
+print("--- 正在執行 VAR 模型估計 ---")
+model = VAR(df_diff)
+results = model.fit(maxlags=12, ic='aic')
+print(results.summary())
+
+# 繪製脈衝響應圖
+irf = results.irf(12)
+irf.plot(impulse='house_price', response='real_wage')
+plt.title("Impulse Response: House Price Shock on Real Wage")
+plt.show()
+
+
+# ==========================================
+# 3. AI/機器學習分析：隨機森林特徵重要性 (Feature Importance)
+# ==========================================
+
+print("--- 正在執行 AI 機器學習特徵權重分析 ---")
+# 建立滯後特徵模擬時間傳導
+for lag in range(1, 4):
+    df_diff[f'cpi_food_lag{lag}'] = df_diff['cpi_food'].shift(lag)
+    df_diff[f'house_price_lag{lag}'] = df_diff['house_price'].shift(lag)
+
+df_ml = df_diff.dropna()
+
+X = df_ml.filter(regex='lag')
+y = df_ml['real_wage']
+
+# 訓練隨機森林模型
+rf = RandomForestRegressor(n_estimators=100, random_state=42)
+rf.fit(X, y)
+
+# 視覺化特徵重要性
+importances = rf.feature_importances_
+indices = np.argsort(importances)[::-1]
+
+plt.figure(figsize=(10, 6))
+sns.barplot(x=importances[indices], y=X.columns[indices], palette='viridis')
+plt.title("AI Feature Importance: What Squeezes Youth Real Wage Most?")
+plt.xlabel("Importance Score")
+plt.ylabel("Macroeconomic Indicators (Lagged)")
+plt.tight_layout()
+plt.show()</code></pre>
+
+    <div class="footer">
+        淡江大學《AI與經濟研究報告》專題小組資料
+    </div>
+
+</body>
+</html>
