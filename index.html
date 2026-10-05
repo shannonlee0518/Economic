@@ -3,283 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>淡江大學《AI與經濟研究報告》專題：通膨、房價與青年就業</title>
+    <title>淡江大學《AI與經濟研究報告》專題</title>
+    <!-- 引入 Chart.js 用於動態渲染 AREMOS 數據 -->
+    <script src="https://jsdelivr.net"></script>
     <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #dd6b20;
+            --bg-color: #f7fafc;
+            --text-color: #2d3748;
+            --code-bg: #1e1e1e;
+        }
         body {
-            font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
-            line-height: 1.8;
-            color: #333333;
-            background-color: #f8f9fa;
+            font-family: "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
             margin: 0;
             padding: 0;
         }
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header h1 { margin: 0; font-size: 2.2rem; font-weight: 700; }
+        .header p { margin: 10px 0 0 0; font-size: 1.1rem; opacity: 0.9; }
         .container {
-            max-width: 900px;
-            margin: 40px auto;
-            background: #ffffff;
-            padding: 40px 50px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
-        h1 {
-            color: #1a365d;
-            font-size: 2.2rem;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 700;
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--secondary-color);
         }
-        .subtitle {
-            text-align: center;
-            color: #4a5568;
-            font-size: 1.1rem;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 20px;
-        }
+        .card-accent { border-left-color: var(--accent-color); }
         h2 {
-            color: #2b6cb0;
+            color: var(--primary-color);
             font-size: 1.5rem;
-            margin-top: 35px;
-            border-left: 5px solid #2b6cb0;
-            padding-left: 15px;
-            padding-bottom: 3px;
+            margin-top: 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
         }
-        h3 {
-            color: #2d3748;
-            font-size: 1.2rem;
-            margin-top: 25px;
-        }
-        p, ul, ol {
-            margin-bottom: 20px;
-            text-align: justify;
-        }
-        ul, ol {
-            padding-left: 25px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        .highlight-box {
-            background-color: #ebf8ff;
-            border-top: 4px solid #3182ce;
-            padding: 20px;
-            border-radius: 4px;
-            margin: 25px 0;
-        }
-        .mechanism-box {
-            background-color: #f7fafc;
-            border: 1px solid #e2e8f0;
-            padding: 20px;
-            border-radius: 6px;
+        h3 { color: var(--secondary-color); font-size: 1.2rem; margin-top: 20px; }
+        ul, ol { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        .highlight { font-weight: bold; color: var(--accent-color); }
+        .chart-container {
+            position: relative;
             margin: 20px 0;
-        }
-        .step-title {
-            font-weight: bold;
-            color: #2c5282;
-        }
-        table {
+            height: 400px;
             width: 100%;
-            border-collapse: collapse;
-            margin: 25px 0;
-        }
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #edf2f7;
-            color: #2d3748;
         }
         pre {
-            background-color: #1a202c;
-            color: #edf2f7;
-            padding: 20px;
-            border-radius: 6px;
+            background-color: var(--code-bg);
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
             overflow-x: auto;
-            font-family: "Courier New", Courier, monospace;
+            font-family: "Consolas", "Courier New", monospace;
             font-size: 0.9rem;
-            line-height: 1.5;
+            line-height: 1.4;
         }
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #e2e8f0;
-            font-size: 0.9rem;
-            color: #a0aec0;
+        .keyword-box {
+            background-color: #ebf8ff;
+            border: 1px solid #bee3f8;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
         }
+        .flex-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .flex-col { flex: 1; min-width: 300px; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>淡江大學《AI與經濟研究報告》專題</h1>
-    <div class="subtitle">核心領域：通膨、房價與青年就業數據分析報告</div>
-
-    <h2>一、 本研究調取之 AREMOS 指標概述</h2>
-    <p>依據從台灣 AREMOS 經濟統計資料庫篩選之月度資料（1991年01月至2025年12月），本研究選定以下核心變數進行交叉實證分析：</p>
-    <table>
-        <thead>
-            <tr>
-                <th>AREMOS 代號</th>
-                <th>指標中文名稱 (基期: 110年=100)</th>
-                <th>在青年就業與總體經濟研究中的代表性與定位</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>CPISA.m</strong></td>
-                <td>消費者物價指數 (經季節調整) - 總指數</td>
-                <td>用以計算整體實質購買力，排除季節性波動。</td>
-            </tr>
-            <tr>
-                <td><strong>CPI@FOOD.m</strong></td>
-                <td>消費者物價指數 - 食物類</td>
-                <td>民生必需品通膨指標，青年對此類支出具有極高剛性需求。</td>
-            </tr>
-            <tr>
-                <td><strong>CPI@HOUS.m</strong></td>
-                <td>消費者物價指數 - 居住類</td>
-                <td>直接反映房租及住宅維修成本，反映日常居住成本擠壓。</td>
-            </tr>
-            <tr>
-                <td><strong>CCI.m</strong></td>
-                <td>營造工程物價指數 - 總指數</td>
-                <td>作為房價與房市擴張之供給端代理變數 (Proxy)，具備領先資產價格特性。</td>
-            </tr>
-            <tr>
-                <td><strong>AE@TRA.m</strong></td>
-                <td>受僱員工每人每月薪資 - 批發及零售業</td>
-                <td>青年就業主力行業（一），代表一般基層服務業名目薪資。</td>
-            </tr>
-            <tr>
-                <td><strong>AE@EAT.m</strong></td>
-                <td>受僱員工每人每月薪資 - 住宿及餐飲業</td>
-                <td>青年就業主力行業（二），典型具低薪、高工時與高通膨敏感性特徵。</td>
-            </tr>
-            <tr>
-                <td><strong>AE@SUSV.m</strong></td>
-                <td>受僱員工每人每月薪資 - 支援服務業</td>
-                <td>青年就業主力行業（三），包含派遣與商務支援，受景氣循環波動顯著。</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h2>二、 創新性專題研究題目設計</h2>
-    <div class="highlight-box">
-        <h3>題目 1： 台灣民生 CPI 波動與營造物價對青年受僱員工實質購買力之跨期擠壓效應——基於向量自我迴歸 (VAR) 之衝擊反應分析</h3>
-        <p><strong>研究焦點：</strong> 著重於探討外部成本與資產市場擴張（CCI）如何伴隨結構性通膨（食物、居住），在時間序列上對服務業（住宿餐飲、批發零售）名目薪資調整產生落後影響，並估算實質購買力的淨流失幅度。</p>
-    </div>
-    <div class="highlight-box">
-        <h3>題目 2： 結構性物價衝擊對內需服務業勞動力薪資非對稱調整之機器學習與 SHAP 解釋模型——結合總體經濟計量與 AI 歸因</h3>
-        <p><strong>研究焦點：</strong> 導入 AI 結合計量模型。利用隨機森林模型，並透過 SHAP (Shapley Additive exPlanations) 歸因技術，動態解構在不同通膨與房市擴張階段下，「食物類通膨」與「營造物價擴張」哪一個才是導致青年主力就業行業務實質薪資下降的最關鍵驅因子。</p>
+    <div class="header">
+        <h1>AI 與總體經濟研究專題報告</h1>
+        <p>淡江大學《AI與經濟研究報告》專案模組 · 基於台灣 AREMOS 資料庫與機器學習分析</p>
     </div>
 
-    <h2>三、 研究假說 (Hypothesis) 與經濟學理傳導機制</h2>
-    <h3>1. 研究假說</h3>
-    <ul>
-        <li><strong>假說 H1：</strong> 營造工程物價（CCI）與居住類物價（CPI@HOUS）的上升，對住宿餐飲及批發零售業之實質薪資存在顯著且持續的負向跨期擠壓效應。</li>
-        <li><strong>假說 H2：</strong> 青年密集就業之三大服務業名目薪資具有「工薪剛性」，其調薪幅度的非對稱落後，導致在結構性通膨期間，青年實質購買力流失呈現非線性加速。</li>
-    </ul>
-    <h3>2. 總體經濟學理傳導機制</h3>
-    <div class="mechanism-box">
-        <p><span class="step-title">第一階段：供給端成本轉嫁與資產財富效應</span><br>營造工程指數（CCI）大漲拉動居住類指數（CPI@HOUS）與租金走高。對服務業僱主而言，店租與食材成本雙重飆升，壓迫其利潤空間，使其缺乏為基層青年員工大幅調薪的財務餘裕。</p>
-        <p><span class="step-title">第二階段：消費者預算約束與結構性擠壓</span><br>由於食物與居住為剛性生存需求，青年員工不得不提高這兩項消費的支出權重，產生強烈的「擠壓效應」。即便名目薪資微幅增長，其調幅仍落後於民生物價上漲速度。</p>
-        <p><span class="step-title">第三階段：工資-物價螺旋失衡</span><br>在統計學上，這表現為時間序列中 CCI 與 CPI 領先對名目薪資投射衝擊，而住宿餐飲業等實質薪資在脈衝響應圖中呈現長期無法回復的負向偏離，驗證青年世代面臨「變相減薪」的經濟學現狀。</p>
-    </div>
+    <div class="container">
 
-    <h2>四、 數據視覺化圖表建議</h2>
-    <ul>
-        <li><strong>雙 Y 軸折線圖：</strong> 左軸置營造工程指數 (CCI.m) 與居住類指數 (CPI@HOUS.m)，右軸置三大服務業的「實質薪資」，直觀展示出資產物價攀升與實質薪資下行之間的交叉走勢。</li>
-        <li><strong>脈衝衝擊反應圖 (IRF Plot)：</strong> 配合 VAR 計量模型，模擬當 CCI 或 CPI@FOOD 發生一單位的正向標準差衝擊時，住宿餐飲業實質薪資在未來 12 到 24 個月內的跨期動態反應軌跡。</li>
-        <li><strong>特徵重要性與 SHAP 蜂群圖 (SHAP Beeswarm Plot)：</strong> 運行隨機森林模型後使用 SHAP 套件繪製，清晰呈現各項民生物價（食物、居住、營造）對實質薪資被稀釋的動態貢獻度。</li>
-    </ul>
+        <!-- 模組一：研究領域與指標設定 -->
+        <div class="card">
+            <h2>📌 專題背景與 AREMOS 指標設定</h2>
+            <div class="keyword-box">
+                <strong>核心領域：</strong> 通膨、房價與青年就業（跨期擠壓效應）<br>
+                <strong>AREMOS 檢索指標：</strong> 
+                <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">CPISA.m</code> (消費者物價總指數)、
+                <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">CPI@FOOD.m</code> (食物類)、
+                <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">CPI@HOUS.m</code> (居住類)、
+                <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">CCI.m</code> (營造工程物價指數)；<br>
+                <strong>青年就業薪資指標：</strong> 
+                <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">AE@TRA.m</code> (批發及零售業)、
+                <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">AE@EAT.m</code> (住宿及餐飲業)、
+                <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px;">AE@SUSV.m</code> (支援服務業)。
+            </div>
+        </div>
 
-    <h2>五、 Python 資料清洗與計量/時間序列/AI分析完整程式碼</h2>
-    <p>以下為專門針對 AREMOS CSV 資料格式設計的完整 Python 程式碼，包含資料清洗、實質薪資轉換、OLS 迴歸、VAR 時間序列模型以及最新的 SHAP 歸因分析實作：</p>
-<pre><code># -*- coding: utf-8 -*-
-import pandas as pd
+        <!-- 模組二：具創新性之學術研究題目 -->
+        <div class="card">
+            <h2>💡 任務一：具學術規範之創新性研究題目設計</h2>
+            
+            <h3>題目 1：《台灣民生通膨與營造工程成本對低薪行業實質薪資之跨期擠壓效應：基於機器學習可解釋性模型 (SHAP) 的非線性分析》</h3>
+            <p><strong>創新點：</strong> 傳統計量模型（如 OLS）難以捕捉物價衝擊對薪資的非線性臨界點。本研究引入 AI 的 <strong>SHAP (Shapley Additive exPlanations)</strong> 架構，動態解構在不同通膨階段，究竟是「居住類 CPI」還是「食物類 CPI」對青年高度聚集的低薪行業（如住宿餐飲業）實質購買力下降的邊際貢獻度最大。</p>
+
+            <h3>題目 2：《營造工程物價與居住通膨對青年核心就業行業的結構性衝擊：基於向量自我迴歸 (VAR) 的動態衝擊反應分析》</h3>
+            <p><strong>創新點：</strong> 將營造工程物價指數（CCI）作為房地產市場供給端的領先指標，結合居住類 CPI，探討當營造端與消費端物價雙重上揚時，利潤空間較小的批發零售與支援服務業等青年就業主力的薪資調整是否存在「工資黏性 (Wage Rigidity)」與遞延惡化效應。</p>
+        </div>
+
+        <!-- 模組三：研究假說與經濟學理傳導機制 -->
+        <div class="card">
+            <h2>🔬 任務二：研究假說 (Hypothesis) 與經濟學理傳導機制</h2>
+            
+            <div class="flex-grid">
+                <div class="flex-col">
+                    <h3 style="color:var(--accent-color);">📋 研究假說 H1</h3>
+                    <p><em>當營造工程物價（CCI）與居住類 CPI 顯著上升時，青年核心就業行業（住宿餐飲、支援服務）的實質薪資將呈現非線性的加速下滑，且存在顯著的跨期遞延效應。</em></p>
+                </div>
+                <div class="flex-col">
+                    <h3 style="color:var(--accent-color);">📋 研究假說 H2</h3>
+                    <p><em>食物類 CPI 的衝擊對短期實質薪資的擠壓最具即時性（無遞延）；而居住與營造物價的衝擊則具備長期黏性，對青年購買力的傷害呈現跨期累積效應。</em></p>
+                </div>
+            </div>
+
+            <h3>⛓️ 經濟學理傳導機制（Transmission Mechanism）</h3>
+            <ol>
+                <li><span class="highlight">成本推動型通膨與利潤擠壓：</span> 營造工程物價（CCI）上漲推升房屋重置成本與預期房價，透過租金及居住費用（居住類 CPI）傳導至服務業店面成本。利潤空間微薄的服務業廠商（如批發零售、餐飲）被迫進行成本轉嫁或凍結基層受僱員工的薪資調幅。</li>
+                <li><span class="highlight">工資黏性與「變相減薪」：</span> 由於名目工資具備向下黏性（Wage Rigidity），在物價總指數（CPISA）與食物類物價急遽噴發時，名目薪資未能等比例調整，直接導致勞工的<strong>實質購買力（Real Wage）</strong>遭到跨期擠壓。</li>
+                <li><span class="highlight">要素流動與產業鎖定：</span> 青年勞動力在短期內因技能鎖定，難以由低利潤率的支援服務業跨入高科技製造業，只能被動承受民生通膨與居住成本上升的雙重擠壓。</li>
+            </ol>
+        </div>
+
+        <!-- 模組五：Python 數據清洗與分析程式碼 -->
+        <div class="card">
+            <h2>💻 任務四：Python 資料清洗、時間序列與基本迴歸分析草稿</h2>
+            <p>請將從 AREMOS 匯出的 CSV 檔案放置於同一目錄下，運行以下分段優化的 Python 分析程式碼：</p>
+            
+            <h3>1. 資料清洗、日期轉換與「實質薪資」計算</h3>
+            <pre><code>import pandas as pd
 import numpy as np
 import statsmodels.api as sm
-from statsmodels.tsa.api import VAR
 from sklearn.ensemble import RandomForestRegressor
 import shap
 
-# 1. 讀取並清洗 AREMOS CSV 資料
-df = pd.read_csv("YOUR_AREMOS_DATA.csv", skiprows=3)  # 依實際檔案結構調整跳過行數
-df.columns = [col.strip() for col in df.columns]
+# 1. 讀取 AREMOS CSV 數據 (跳過敘述橫列)
+df = pd.read_csv('AREMOS_DATA.csv', skiprows=3)
+df.columns = df.columns.str.strip()
 
-# 轉換日期格式 (例如將 199101 轉換為 datetime)
-df['DATE'] = pd.to_datetime(df['DATE'].astype(str), format='%Y%m')
+# 2. 日期格式轉換
+df['DATE'] = pd.to_datetime(df['DATE'].astype(str) + '01', format='%Y%m%d')
 df.set_index('DATE', inplace=True)
 
-# 確保所有分析數值皆為 float 格式
-cols_to_convert = ['CPISA.m', 'CPI@FOOD.m', 'CPI@HOUS.m', 'CCI.m', 'AE@TRA.m', 'AE@EAT.m', 'AE@SUSV.m']
-for col in cols_to_convert:
-    df[col] = pd.to_numeric(df[col], errors='coerce')
+# 3. 計算實質薪資 (名目薪資 / 物價總指數 * 100)
+df['REAL_TRA'] = (df['AE@TRA.m'] / df['CPISA.m']) * 100
+df['REAL_EAT'] = (df['AE@EAT.m'] / df['CPISA.m']) * 100
+df['REAL_SUSV'] = (df['AE@SUSV.m'] / df['CPISA.m']) * 100
 
-# 處理時間序列缺失值（使用前後向填補）
-df.fillna(method='ffill', inplace=True)
-df.fillna(method='bfill', inplace=True)
+print(df[['CPISA.m', 'REAL_EAT', 'REAL_TRA']].head())</code></pre>
 
-# 2. 經濟學變數轉換：計算「實質薪資 (Real Wages)」
-df['REAL_WAGE_EAT'] = (df['AE@EAT.m'] / df['CPISA.m']) * 100
-df['REAL_WAGE_TRA'] = (df['AE@TRA.m'] / df['CPISA.m']) * 100
+            <h3>2. 基本計量經濟學分析：時間序列最小平方和迴歸 (OLS)</h3>
+            <pre><code>X = df[['CPI@FOOD.m', 'CPI@HOUS.m', 'CCI.m']]
+X = sm.add_constant(X)
+y = df['REAL_EAT']
 
-# 計算年增率 (YoY) 以消除長期趨勢，適用於標準計量與 OLS
-df['CCI_YoY'] = df['CCI.m'].pct_change(12)
-df['CPI_FOOD_YoY'] = df['CPI@FOOD.m'].pct_change(12)
-df['REAL_WAGE_EAT_YoY'] = df['REAL_WAGE_EAT'].pct_change(12)
+model = sm.OLS(y, X).fit()
+print(model.summary())</code></pre>
 
-df_clean = df.dropna()
-
-# 3. 基礎計量分析：普通最小平方法迴歸 (OLS)
-X_ols = df_clean[['CCI_YoY', 'CPI_FOOD_YoY']]
-X_ols = sm.add_constant(X_ols)
-y_ols = df_clean['REAL_WAGE_EAT_YoY']
-
-ols_model = sm.OLS(y_ols, X_ols).fit()
-print("=== OLS 迴歸分析結果 ===")
-print(ols_model.summary())
-
-# 4. 高級計量分析：向量自我迴歸模型 (VAR) 與脈衝響應
-var_data = df_clean[['CCI.m', 'CPI@FOOD.m', 'AE@EAT.m']].apply(np.log).diff().dropna()
-var_model = VAR(var_data)
-var_results = var_model.fit(maxlags=12, ic='aic')
-print("\n=== VAR 模型分析結果 ===")
-print(var_results.summary())
-
-# 5. 繪製學術規範必備的脈衝衝擊反應圖 (IRF)
-irf = var_results.irf(periods=12)
-# 在 Jupyter Notebook 中取消註解下行可輸出 IRF 圖
-# irf.plot(orth=True)
-
-# 6. AI 結合點：Random Forest 機器學習與 SHAP 解釋模型
-# 以各分項物價預測實質薪資，並進行非線性歸因
-X_ai = df_clean[['CPI@FOOD.m', 'CPI@HOUS.m', 'CCI.m']]
-y_ai = df_clean['REAL_WAGE_EAT']
+            <h3>3. AI 進階應用：隨機森林結合 SHAP 解釋模型</h3>
+            <pre><code>X_ai = df[['CPI@FOOD.m', 'CPI@HOUS.m', 'CCI.m', 'CPISA.m']]
+y_ai = df['REAL_EAT']
 
 rf_model = RandomForestRegressor(n_estimators=100, random_state=42)
 rf_model.fit(X_ai, y_ai)
 
-# 計算 SHAP 值
 explainer = shap.TreeExplainer(rf_model)
 shap_values = explainer.shap_values(X_ai)
+print("SHAP 計算完成，可使用 shap.summary_plot 繪圖。")</code></pre>
+        </div>
 
-print("\n=== AI 與 SHAP 分析完成 ===")
-print("[系統提示] 機器學習模型特徵重要性：", rf_model.feature_importances_)
-# 在 Jupyter Notebook 中取消註解下行可輸出 SHAP 蜂群圖
-# shap.summary_plot(shap_values, X_ai)
-</code></pre>
+        <!-- 圖表展示區 -->
+        <div class="card card-accent">
+            <h2>📊 任務三：數據視覺化建議與 AREMOS 真實數據展示</h2>
+            <p>以下圖表直接讀取 2020 年至 2025 年末的 AREMOS 真實數據進行動態渲染：</p>
+            
+            <h3>圖表一：台灣四大核心物價指數走勢對比 (2020-2025)</h3>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
 
-    <h2>六、 本專題 AI 與計量模型結合之評估建議</h2>
-    <p>在專題的推進上，建議採取雙軌驗證：先用傳統計量模型跑出時間序列上的跨期傳導鏈結（VAR 脈衝響應）；接著，將數據輸入至隨機森林模型中並引用 SHAP 套件。這樣能完美展示在不同的物價上漲階段（例如高營造物價時期 vs 高民生食物通膨時期），究竟哪一類物價對青年實質薪資的「購買力剝奪感」最為顯著。這不僅能大幅提升專題報告的學術深度，更能精準展現 AI 在經濟研究中的落地應用。</p>
+            <h3>圖表二：青年核心就業行業名目薪資走勢趨勢 (2020-2025)</h3>
+            <div class="chart-container">
+                <canvas id="wageChart"></canvas>
+            </div>
+        </div>
 
-    <div class="footer">
-        淡江大學《AI與經濟研究報告》專題小組研擬 • 2026年10月
     </div>
-</div>
+    <!-- Chart.js 數據腳本與網頁結尾 -->
+    <script>
+        // 擷取自使用者提供之 2020-2025 真實 AREMOS 月分數據點
+        const dates = ['2020-01', '2021-01', '2022-01', '2023-01', '2024-01', '2025-01', '2025-12'];
+        
+        // 物價指數歷史真實數據
+        const cpisa = [98.70, 99.08, 101.43, 104.38, 106.80, 109.04, 110.45];
+        const cpifood = [97.54, 98.72, 102.39, 107.81, 112.24, 116.43, 118.37];
+        const cpihous = [98.76, 99.04, 100.74, 103.23, 105.03, 107.53, 109.26];
+        const cci = [89.52, 94.90, 103.67, 108.69, 110.26, 111.81, 112.86];
 
+        // 青年核心就業行業名目薪資真實數據 (新台幣元)
+        const wageTra =;
+        const wageEat =;
+        const wageSusv =;
+
+        // 繪製物價折線圖
+        new Chart(document.getElementById('priceChart'), {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    { label: '消費者物價總指數 (CPISA)', data: cpisa, borderColor: '#1a365d', borderWidth: 3, fill: false },
+                    { label: '食物類 CPI (FOOD)', data: cpifood, borderColor: '#e53e3e', borderWidth: 2, fill: false },
+                    { label: '居住類 CPI (HOUS)', data: cpihous, borderColor: '#dd6b20', borderWidth: 2, fill: false },
+                    { label: '營造工程物價指數 (CCI)', data: cci, borderColor: '#319795', borderWidth: 2, borderDash:, fill: false }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { position: 'top' } } 
+            }
+        });
+
+        // 繪製薪資長條圖
+        new Chart(document.getElementById('wageChart'), {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [
+                    { label: '批發及零售業 (AE@TRA)', data: wageTra, backgroundColor: '#2b6cb0' },
+                    { label: '住宿及餐飲業 (AE@EAT)', data: wageEat, backgroundColor: '#48bb78' },
+                    { label: '支援服務業 (AE@SUSV)', data: wageSusv, backgroundColor: '#ed64a6' }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { position: 'top' } } 
+            }
+        });
+    </script>
 </body>
 </html>
