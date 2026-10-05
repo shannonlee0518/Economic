@@ -1,4 +1,27 @@
-<!DOCTYPE html>
+import pandas as pd
+import numpy as np
+import os
+
+# ==============================================================================
+# 第一步：確認同學下載的原始 CSV 檔案是否存在
+# ==============================================================================
+# 請確保你下載的檔案命名為 'CPISA.m.csv'，且與此程式碼放在同一個資料夾
+csv_filename = 'CPISA.m.csv'
+
+if not os.path.exists(csv_filename):
+    # 如果檔案不小心取名成其他名字，這裡做個防呆自動抓取
+    possible_files = [f for f in os.listdir('.') if f.endswith('.csv')]
+    if possible_files:
+        csv_filename = possible_files[0]
+        print(f"⚠️ 未找到 'CPISA.m.csv'，自動偵測並採用同資料夾下的檔案：'{csv_filename}'")
+    else:
+        raise FileNotFoundError("❌ 找不到下載的 CSV 檔案，請確認檔案與此程式碼在同一個資料夾下！")
+
+# ==============================================================================
+# 第二步：自動生成完全符合你數據的 HTML 專題報告規劃藍圖
+# ==============================================================================
+
+html_content = """<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -95,7 +118,8 @@
         <li><strong>SHAP 變數貢獻度熱力圖 (SHAP Dependency Plot)：</strong> 透過機器學習模型計算後，呈現不同通膨環境下，房價與食物類 CPI 對實質購買力下降的動態貢獻度。</li>
     </ul>
 
-    <h2>四、 Python 資料清洗與分析程式碼</h2>
+    <h2>四、 Python 資料清洗與分析完整程式碼</h2>
+    <p>以下為專門針對你自 AREMOS 下載之真實歷史數據（1991-2025）進行分析的完整 Python 核心程式碼：</p>
 
 <pre><code>import pandas as pd
 import numpy as np
@@ -104,76 +128,42 @@ import seaborn as sns
 from statsmodels.tsa.api import VAR
 from sklearn.ensemble import RandomForestRegressor
 
-# ==========================================
-# 1. 資料清洗與預處理 (Data Cleaning)
-# ==========================================
-
-try:
-    df = pd.read_csv('aremos_data.csv', encoding='utf-8')
-except UnicodeDecodeError:
-    df = pd.read_csv('aremos_data.csv', encoding='cp950')
-
-# 時間欄位格式轉換並設為索引
-df['date'] = df['date'].astype(str).str.replace('M', '-')
-df['date'] = pd.to_datetime(df['date'] + '-01' if 'M' in str(df['date'].iloc) else df['date'])
+# 1. 資料清洗與對齊
+df = pd.read_csv('""" + csv_filename + """', skiprows=3, encoding='utf-8')
+df.columns = ['date', 'cpi_total', 'cpi_food', 'cpi_housing', 'house_price', 'wage_trade', 'wage_eat', 'wage_service']
+df['date'] = pd.to_datetime(df['date'].astype(str) + '01', format='%Y%m%d')
 df.set_index('date', inplace=True)
-
-# 處理缺失值
-df = df.ffill().bfill()
+df = df.astype(float).ffill().bfill()
 
 # 計算衍生指標：實質薪資 (名目薪資 / 總CPI * 100)
-df['real_wage'] = (df['wage'] / df['cpi_total']) * 100
+df['real_wage_eat'] = (df['wage_eat'] / df['cpi_total']) * 100
 
-# 時間序列平穩化：取對數後一階差分
-df_diff = np.log(df[['cpi_food', 'house_price', 'real_wage']]).diff().dropna()
+# 取對數一階差分實現時間序列平穩化
+df_diff = np.log(df[['cpi_food', 'cpi_housing', 'house_price', 'real_wage_eat']]).diff().dropna()
 
-
-# ==========================================
-# 2. 傳統總體經濟分析：向量自我迴歸 (VAR 模型)
-# ==========================================
-
-print("--- 正在執行 VAR 模型估計 ---")
+# 2. 向量自我迴歸 (VAR 模型)
 model = VAR(df_diff)
 results = model.fit(maxlags=12, ic='aic')
 print(results.summary())
 
-# 繪製脈衝響應圖
-irf = results.irf(12)
-irf.plot(impulse='house_price', response='real_wage')
-plt.title("Impulse Response: House Price Shock on Real Wage")
-plt.show()
-
-
-# ==========================================
-# 3. AI/機器學習分析：隨機森林特徵重要性 (Feature Importance)
-# ==========================================
-
-print("--- 正在執行 AI 機器學習特徵權重分析 ---")
-# 建立滯後特徵模擬時間傳導
-for lag in range(1, 4):
-    df_diff[f'cpi_food_lag{lag}'] = df_diff['cpi_food'].shift(lag)
-    df_diff[f'house_price_lag{lag}'] = df_diff['house_price'].shift(lag)
-
+# 3. AI/機器學習：隨機森林時間滯後特徵分析
+features_to_lag = ['cpi_food', 'cpi_housing', 'house_price']
+for col in features_to_lag:
+    for lag in range(1, 4):
+        df_diff[f'{col}_lag{lag}'] = df_diff[col].shift(lag)
 df_ml = df_diff.dropna()
 
 X = df_ml.filter(regex='lag')
-y = df_ml['real_wage']
+y = df_ml['real_wage_eat']
 
-# 訓練隨機森林模型
-rf = RandomForestRegressor(n_estimators=100, random_state=42)
+rf = RandomForestRegressor(n_estimators=200, random_state=42)
 rf.fit(X, y)
 
-# 視覺化特徵重要性
+# 輸出特徵重要性權重
 importances = rf.feature_importances_
 indices = np.argsort(importances)[::-1]
-
-plt.figure(figsize=(10, 6))
-sns.barplot(x=importances[indices], y=X.columns[indices], palette='viridis')
-plt.title("AI Feature Importance: What Squeezes Youth Real Wage Most?")
-plt.xlabel("Importance Score")
-plt.ylabel("Macroeconomic Indicators (Lagged)")
-plt.tight_layout()
-plt.show()</code></pre>
+print("AI 特徵重要性排行：", list(zip(X.columns[indices], importances[indices])))
+</code></pre>
 
     <div class="footer">
         淡江大學《AI與經濟研究報告》專題小組資料
@@ -181,3 +171,66 @@ plt.show()</code></pre>
 
 </body>
 </html>
+"""
+
+# 將乾淨的 HTML 寫入本機檔案
+output_html_name = '淡江大學_AI與經濟研究報告_專題藍圖.html'
+with open(output_html_name, 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print(f"🎯 【一鍵生成成功】")
+print(f"已經幫你自動刪除所有提問防禦準備，並生成了最專業的學術規格 HTML 檔案！")
+print(f"📁 請到資料夾下直接雙擊打開：'{output_html_name}' 查看報告藍圖。")
+print(f"🚀 同時，你也可以直接在目前的 Python 環境執行下方的分析程式，看你的實測圖表結果。")
+print("-" * 60)
+
+# ==============================================================================
+# 第三步：直接在 Python 裡幫你跑一遍分析並畫圖（讓同學免去複製的麻煩）
+# ==============================================================================
+try:
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    from statsmodels.tsa.api import VAR
+    from sklearn.ensemble import RandomForestRegressor
+
+    # 執行清洗
+    df_run = pd.read_csv(csv_filename, skiprows=3, encoding='utf-8')
+    df_run.columns = ['date', 'cpi_total', 'cpi_food', 'cpi_housing', 'house_price', 'wage_trade', 'wage_eat', 'wage_service']
+    df_run['date'] = pd.to_datetime(df_run['date'].astype(str) + '01', format='%Y%m%d')
+    df_run.set_index('date', inplace=True)
+    df_run = df_run.astype(float).ffill().bfill()
+    df_run['real_wage_eat'] = (df_run['wage_eat'] / df_run['cpi_total']) * 100
+    df_diff_run = np.log(df_run[['cpi_food', 'cpi_housing', 'house_price', 'real_wage_eat']]).diff().dropna()
+
+    # 執行 VAR
+    print("📈 1. 正在幫你計算總體經濟學 VAR 模型...")
+    var_model = VAR(df_diff_run)
+    var_results = var_model.fit(maxlags=12, ic='aic')
+    
+    # 執行 ML 特徵工程
+    print("🤖 2. 正在幫你計算 AI 機器學習隨機森林特徵權重...")
+    features_to_lag = ['cpi_food', 'cpi_housing', 'house_price']
+    for col in features_to_lag:
+        for lag in range(1, 4):
+            df_diff_run[f'{col}_lag{lag}'] = df_diff_run[col].shift(lag)
+    df_ml_run = df_diff_run.dropna()
+    X_run = df_ml_run.filter(regex='lag')
+    y_run = df_ml_run['real_wage_eat']
+    
+    rf_run = RandomForestRegressor(n_estimators=200, random_state=42)
+    rf_run.fit(X_run, y_run)
+
+    # 繪製圖表
+    importances_run = rf_run.feature_importances_
+    indices_run = np.argsort(importances_run)[::-1]
+    
+    plt.figure(figsize=(10, 5))
+    sns.barplot(x=importances_run[indices_run], y=X_run.columns[indices_run], palette='mako')
+    plt.title("AI Feature Importance: What Squeezes Youth Real Wage Most?", fontsize=12)
+    plt.xlabel("Importance Score")
+    plt.tight_layout()
+    plt.show()
+    print("✨ 圖表繪製完成！")
+    
+except Exception as e:
+    print(f"\n💡 提示：HTML 已生成。若要直接觀看 Python 圖表，請確保已安裝相關套件 (pip install statsmodels scikit-learn seaborn)。錯誤訊息: {e}")
